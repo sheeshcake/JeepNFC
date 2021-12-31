@@ -17,7 +17,8 @@ const Pay = ({navigation, route}) => {
     const [driverData, setDriverData] = useState([])
     const header_h = useRef(new Animated.Value(100)).current
     useEffect(() => {
-
+        let { busData } = route.params
+        setBusData(busData)
         async function get_data(){
             // await AsyncStorage.clear()
             let {data} = await api.getRoutes()
@@ -31,9 +32,6 @@ const Pay = ({navigation, route}) => {
                 setIsAquired(true)
                 console.log(busData)
                 setBusData(JSON.parse(busData).data[0])
-            }else{
-                let { busData } = route.params
-                setBusData(busData)
             }
         }
         get_data()
@@ -130,7 +128,8 @@ const Pay = ({navigation, route}) => {
                 <Text
                     style={{
                         fontSize: 30,
-                        paddingBottom: 20
+                        paddingBottom: 20,
+                        color: 'black'
                     }}
                 >
                     Bus Number: {busData.minibus_number}
@@ -138,7 +137,11 @@ const Pay = ({navigation, route}) => {
                 {console.log(aquiredBus + " == " + busData.m_b_id)}
                 {isAquired && aquiredBus == busData.m_b_id ? 
                     <View>
-                        <Text>Card Number</Text>
+                        <Text
+                            style={{
+                                color: 'black'
+                            }}
+                        >Card Number</Text>
                         <View
                             style={{
                                 borderColor: "#dbdbdb",
@@ -153,13 +156,18 @@ const Pay = ({navigation, route}) => {
                                     height: 40,
                                     color: 'black'
                                 }}
+                                placeholderTextColor="#000" 
                                 secureTextEntry={true}
                                 placeholder="E.g: 1234567890"
                                 onChangeText={setCardNumber}
                                 value={cardNumber}
                             />
                         </View>
-                        <Text>Select Route</Text>
+                        <Text
+                            style={{
+                                color: 'black'
+                            }}
+                        >Select Route</Text>
                         <View
                             style={{
                                 borderColor: "#dbdbdb",
@@ -173,14 +181,19 @@ const Pay = ({navigation, route}) => {
                                 onValueChange={(itemValue, itemIndex) =>
                                 setSelectedRoute(itemValue)
                                 }
+                                itemStyle={{color: "black"}}
                             >
                                 {bus_routes?.map((d) => { return (
-                                    <Picker.Item label={`${d.route_end} to ${d.route_start}`} value={d.route_id}/>
+                                    <Picker.Item color="black"  label={`${d.route_end} to ${d.route_start}`} value={d.route_id}/>
                                 )
                                 })}
                             </Picker>
                         </View>
-                        <Text>Amount</Text>
+                        <Text
+                            style={{
+                                color: 'black'
+                            }}
+                        >Amount</Text>
                         <View
                             style={{
                                 borderColor: "#dbdbdb",
@@ -195,6 +208,7 @@ const Pay = ({navigation, route}) => {
                                     height: 40,
                                     color: 'black'
                                 }}
+                                placeholderTextColor="#000" 
                                 keyboardType='numeric'
                                 placeholder="E.g: ₱20"
                                 onChangeText={setTotalPayment}
@@ -224,12 +238,12 @@ const Pay = ({navigation, route}) => {
                                     }}
                                 >Pay</Text>
                             </TouchableOpacity>
-                            <Text>Scroll To Leave Bus</Text>
+                            <Text style={{color: 'black'}}>Scroll To Leave Bus</Text>
                         </View>
                         <View
                             style={{
                                 flex: 1,
-                                marginTop: 100,
+                                marginTop: 150,
                                 marginBottom: 50,
                                 justifyContent: 'center',
                                 alignItems: 'center'
@@ -253,8 +267,12 @@ const Pay = ({navigation, route}) => {
                         </View>
                         
                     </View>
-                : aquiredBus !== busData.m_b_id && !isAquired ?
-                    <Text>You Already Aquired a Bus!</Text>
+                : aquiredBus !== busData.m_b_id && isAquired == true ?
+                    <Text
+                        style={{
+                            color: 'black'
+                        }}
+                    >You Already Aquired a Bus!</Text>
                 : isAquired ? 
                     <TouchableOpacity
                         style={{
@@ -271,7 +289,22 @@ const Pay = ({navigation, route}) => {
                             }}
                         >Aquire Bus</Text>
                     </TouchableOpacity>
-                : null
+                : 
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: "#3366CC",
+                        padding: 20,
+                        borderRadius: 20
+                    }}
+                    onPress={AquireBus}
+                >
+                    <Text
+                        style={{
+                            fontSize: 20,
+                            color: "#FFFFFF"
+                        }}
+                    >Aquire Bus</Text>
+                </TouchableOpacity>
 
                 }
                 

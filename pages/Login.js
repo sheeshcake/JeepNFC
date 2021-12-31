@@ -1,11 +1,11 @@
 import React, { useState, useEffect} from 'react'
-import { View, Text, Image, SafeAreaView, ScrollView, TextInput, Button, StatusBar } from 'react-native'
+import { View, Text, Image, SafeAreaView, PermissionsAndroid, ScrollView, TextInput, Button, StatusBar } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {images} from '../assets';
 import { FooterVersion } from './components';
 import api from '../api';
 import { IgnorePattern } from 'react-native/Libraries/LogBox/LogBox';
-
+import axios from 'axios'
 
 
 
@@ -13,7 +13,8 @@ const Login = ({navigation}) => {
 
 
 useEffect(() => {
-   
+
+    // test()
     getData()
     console.log('hello');
 }, [])

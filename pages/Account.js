@@ -7,12 +7,30 @@ const Account = ({navigation}) => {
 
     const header_h = useRef(new Animated.Value(100)).current
     async function logout(){
-        alert("Logged out!")
-        await AsyncStorage.clear();
-        navigation.reset({
-            index: 0,
-            routes: [{name: 'Login'}],
-        });
+        try{
+            let value = await AsyncStorage.getItem('bus_id');
+            if (value != null){
+                alert("Please Leave The bus before log out!")
+                // alert(value)
+                // let formData = new FormData()
+                // formData.append("bus_id", value)
+                // let {data} = await api.leaveBus(formData)
+                // alert(bus_data)
+            }else{
+                await AsyncStorage.clear();
+                navigation.reset({
+                    index: 0,
+                    routes: [{name: 'Login'}],
+                });
+                alert("Logged out!")
+            }
+        }catch(e){
+            console.log(e)
+            navigation.reset({
+                index: 0,
+                routes: [{name: 'Login'}],
+            });
+        }
     }
 
     return (
