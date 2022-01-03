@@ -5,5 +5,6 @@ import JeepHome from "./JeepHome";
 import MarshallHome from "./MarshallHome";
 import BusDetails from "./BusDetails";
 import Pay from "./Pay";
+import LoadCard from "./LoadCard";
 
-export { Login, JeepHome, Pay, LoadingPage, Account, MarshallHome, BusDetails };
+export { Login, JeepHome, Pay, LoadingPage, LoadCard, Account, MarshallHome, BusDetails };

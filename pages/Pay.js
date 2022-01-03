@@ -56,6 +56,7 @@ const Pay = ({navigation, route}) => {
         formData.append('marshal_id', driverData.m_id)
         let {data} = await api.pay(formData)
         alert(data);
+        setCardNumber("")
     }
 
     async function AquireBus(){
@@ -249,6 +250,21 @@ const Pay = ({navigation, route}) => {
                                 alignItems: 'center'
                             }}
                         >
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: "#3366CC",
+                                    padding: 20,
+                                    borderRadius: 20
+                                }}
+                                onPress={(e) => navigation.navigate("LoadCard") }
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: 20,
+                                        color: "#FFFFFF"
+                                    }}
+                                >Load A Card</Text>
+                            </TouchableOpacity>
                             <TouchableOpacity
                                 style={{
                                     backgroundColor: "#3366CC",

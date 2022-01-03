@@ -57,4 +57,8 @@ export default {
         let res = axios.post(`${BASE_API_URL}/set_end_location.php`, data,axiosConfig)
         return res;
     },
+    loadCard : (data) => {
+        let res = axios.post(`${BASE_API_URL}/load_card.php`, data,axiosConfig)
+        return res;
+    }
 }
