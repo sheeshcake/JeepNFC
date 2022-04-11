@@ -2,6 +2,7 @@ import React, {useEffect, useState, useRef} from 'react'
 import { View, Text, Image, TouchableOpacity } from 'react-native'
 import Animated from 'react-native-reanimated'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { images } from '../../assets'
 
 
 const MainHeaderMarshal = ({navigation, headerY}) => {
@@ -88,7 +89,7 @@ const MainHeaderMarshal = ({navigation, headerY}) => {
                                 resizeMode: 'contain',
                                 borderRadius: 50
                             }}
-                            source={{uri: "https://images.unsplash.com/photo-1509460913899-515f1df34fea?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80"}}
+                            source={images.jeep}
                         />  
                     </TouchableOpacity>
                 </View>

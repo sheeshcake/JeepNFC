@@ -131,7 +131,7 @@ function RenderHeader(){
             }}
         >
             <Image 
-                source={images.logo}
+                source={images.jeep}
             />
         </View>
     )

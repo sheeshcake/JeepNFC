@@ -1,22 +1,62 @@
-import React, {useState, useRef} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import { Animated, View, Text, TextInput, StatusBar, TouchableOpacity } from 'react-native'
 import api from '../api'
 import { SecondaryHeader } from './components'
+import {
+    USBPrinter,
+    NetPrinter,
+    BLEPrinter,
+  } from "react-native-thermal-receipt-printer";
+
 
 const LoadCard = ({navigation}) => {
 
     const [cardNumber, setCardNumber] = useState("")
     const [totalPayment, setTotalPayment] = useState("0")
     const header_h = useRef(new Animated.Value(100)).current
+    const [printers, setPrinters] = useState([]);
+    const [currentPrinter, setCurrentPrinter] = useState();
+    let loaded = false
+    useEffect(() => {
+        BLEPrinter.init().then(()=> {
+            BLEPrinter.getDeviceList().then(setPrinters);
+            });
+    }, []);
+    
+    const _connectPrinter = (printer) => {
+        //connect printer
+        BLEPrinter.connectPrinter(printer.inner_mac_address).then(
+          setCurrentPrinter,
+          error => console.warn(error))
+    }
 
+
+    function removeNumber(number){
+        let num = number.length
+        let hashnum = ""
+        for(i = num; i >= (num - 3); i--){
+            hashnum = number.charAt(i) + hashnum
+        }
+        return "*****" + hashnum;
+    }
 
     async function Load(){
+        // connectPrinter()
         let formData = new FormData()
         formData.append("card_number", cardNumber)
         formData.append("amount", totalPayment)
         let {data} = await api.loadCard(formData)
-        alert(data)
+        // alert(data)
+        let date = Date(Date.now()).toString();
+        let print_data = "<C>Iligan City Jeep Modernizing</C>\n"
+                        +"<C>" + date + "</C>\n"
+                        +"<C>Load your card</C>\n"
+                        +"<C>Card Number: " + removeNumber(cardNumber) + "</C>\n"
+                        +"<C>Load Amount: " + totalPayment + "</C>\n"
+        console.log(currentPrinter)
+        currentPrinter && BLEPrinter.printBill(print_data);
         setCardNumber("")
+        alert(data)
     } 
 
     return (
@@ -89,6 +129,27 @@ const LoadCard = ({navigation}) => {
                         value={totalPayment}
                     />
                 </View>
+                {
+                    currentPrinter ? null :
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                        <Text>Please Select a Bluetooth device</Text>
+                    {
+                        printers.map(printer => (
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: "#3366CC",
+                                padding: 10,
+                                marginBottom: 5,
+                                borderRadius: 20
+                            }}
+                            key={printer.inner_mac_address} onPress={() => _connectPrinter(printer)}>
+                            <Text style={{color: 'white'}}>{printer.device_name}</Text>
+                        </TouchableOpacity>
+                        ))
+                    }
+                    </View>
+                }
+
                 <View
                     style={{
                         marginBottom: 100,

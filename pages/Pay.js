@@ -5,6 +5,11 @@ import { DataTable } from 'react-native-paper';
 import { SecondaryHeader, FooterVersion } from './components';
 import api from "../api";
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import {
+    USBPrinter,
+    NetPrinter,
+    BLEPrinter,
+  } from "react-native-thermal-receipt-printer";
 
 const Pay = ({navigation, route}) => {
     const [busData, setBusData] = useState([])
@@ -12,11 +17,17 @@ const Pay = ({navigation, route}) => {
     const [aquiredBus, setAquiredBus] = useState("")
     const [cardNumber, setCardNumber] = useState("")
     const [selectedRoute, setSelectedRoute] = useState("0")
+    const [routeName, setRouteName] = useState([])
     const [totalPayment, setTotalPayment] = useState("0")
     const [bus_routes, setRoutes] = useState([])
     const [driverData, setDriverData] = useState([])
     const header_h = useRef(new Animated.Value(100)).current
+    const [printers, setPrinters] = useState([]);
+    const [currentPrinter, setCurrentPrinter] = useState();
     useEffect(() => {
+        BLEPrinter.init().then(()=> {
+            BLEPrinter.getDeviceList().then(setPrinters);
+            });
         let { busData } = route.params
         setBusData(busData)
         async function get_data(){
@@ -38,6 +49,21 @@ const Pay = ({navigation, route}) => {
         getUserData()
     }, [])
 
+    const _connectPrinter = (printer) => {
+        //connect printer
+        BLEPrinter.connectPrinter(printer.inner_mac_address).then(
+          setCurrentPrinter,
+          error => console.warn(error))
+    }
+    function removeNumber(number){
+        let num = number.length
+        let hashnum = ""
+        for(i = num; i >= (num - 3); i--){
+            hashnum = number.charAt(i) + hashnum
+        }
+        return "*****" + hashnum;
+    }
+
     async function getUserData(){
         let data_json = await AsyncStorage.getItem('user_data')
         console.log(JSON.parse(data_json));
@@ -49,13 +75,26 @@ const Pay = ({navigation, route}) => {
     async function Pay(){
         let formData = new FormData()
         formData.append('bus_id', busData.m_b_id)
-        formData.append('driver_id', busData.driver_id)
-        formData.append('amount', totalPayment)
+        formData.append('driver_id', busData.d_id)
+        // formData.append('amount', totalPayment)
         formData.append('route_id', selectedRoute)
         formData.append('card_number', cardNumber)
         formData.append('marshal_id', driverData.m_id)
         let {data} = await api.pay(formData)
-        alert(data);
+        console.log(data)
+        alert(data["message"]);
+        let date = Date(Date.now()).toString();
+        let print_data = "<C>Iligan City Jeep Modernizing</C>\n"
+                        +"<C>" + date + "</C>\n"
+                        +"<C>Bus Number: " + busData.minibus_number + "</C>\n"
+                        +"<C>Driver ID: " + busData.d_id + "</C>\n"
+                        +"<C>Marshal ID: " + driverData.m_id + "</C>\n"
+                        +"<C>Route: " + routeName.route_start + "," + routeName.route_end + "(vice versa)</C>\n"
+                        +"<C>Card Number: " + removeNumber(cardNumber) + "</C>\n"
+                        +"<C>Fair Amount: " + routeName.route_amount + "</C>\n"
+                        +"<C>Card Balance: " + data.data.card_amount + "</C>\n"
+        console.log(currentPrinter)
+        currentPrinter && BLEPrinter.printBill(print_data);
         setCardNumber("")
     }
 
@@ -135,6 +174,26 @@ const Pay = ({navigation, route}) => {
                 >
                     Bus Number: {busData.minibus_number}
                 </Text>
+                {
+                    currentPrinter ? null :
+                    <View style={{ marginTop: 120, justifyContent: 'center', alignItems: 'center'}}>
+                        <Text>Please Select a Bluetooth device</Text>
+                    {
+                        printers.map(printer => (
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: "#3366CC",
+                                padding: 10,
+                                marginBottom: 5,
+                                borderRadius: 20
+                            }}
+                            key={printer.inner_mac_address} onPress={() => _connectPrinter(printer)}>
+                            <Text style={{color: 'white'}}>{printer.device_name}</Text>
+                        </TouchableOpacity>
+                        ))
+                    }
+                    </View>
+                }
                 {console.log(aquiredBus + " == " + busData.m_b_id)}
                 {isAquired && aquiredBus == busData.m_b_id ? 
                     <View>
@@ -179,8 +238,11 @@ const Pay = ({navigation, route}) => {
                         >
                             <Picker
                                 selectedValue={selectedRoute}
-                                onValueChange={(itemValue, itemIndex) =>
-                                setSelectedRoute(itemValue)
+                                onValueChange={(itemValue, itemIndex) =>{
+                                    setSelectedRoute(itemValue)
+                                    setRouteName(bus_routes[itemIndex])
+                                    console.log(bus_routes[itemIndex])
+                                }
                                 }
                                 itemStyle={{color: "black"}}
                             >
@@ -194,8 +256,8 @@ const Pay = ({navigation, route}) => {
                             style={{
                                 color: 'black'
                             }}
-                        >Amount</Text>
-                        <View
+                        >Fair: {routeName?.route_amount ? routeName?.route_amount : 'Please Select a Route'}</Text>
+                        {/* <View
                             style={{
                                 borderColor: "#dbdbdb",
                                 borderWidth: 1,
@@ -215,7 +277,7 @@ const Pay = ({navigation, route}) => {
                                 onChangeText={setTotalPayment}
                                 value={totalPayment}
                             />
-                        </View>
+                        </View> */}
                         <View
                             style={{
                                 flex: 1,
@@ -269,7 +331,8 @@ const Pay = ({navigation, route}) => {
                                 style={{
                                     backgroundColor: "#3366CC",
                                     padding: 20,
-                                    borderRadius: 20
+                                    borderRadius: 20,
+                                    marginBottom: 100
                                 }}
                                 onPress={LeaveBus}
                             >
