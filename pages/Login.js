@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react'
-import { View, Text, Image, SafeAreaView, PermissionsAndroid, ScrollView, TextInput, Button, StatusBar } from 'react-native'
+import { View, Text, Image, SafeAreaView, PermissionsAndroid, ScrollView, TextInput, Button, StatusBar, Dimensions } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {images} from '../assets';
 import { FooterVersion } from './components';
@@ -131,6 +131,7 @@ function RenderHeader(){
             }}
         >
             <Image 
+                style={{height: 200, width: 200}}
                 source={images.jeep}
             />
         </View>
@@ -251,6 +252,9 @@ function RenderForm(){
     )
 }
 
+let width = Dimensions.get('window').width
+let height = Dimensions.get('window').height
+
 
 
     return (
@@ -264,7 +268,10 @@ function RenderForm(){
                 animated={true}
                 backgroundColor="#0CB0E6"
             />
-            {RenderHeader()}
+            {/* {RenderHeader()} */}
+            <View>
+            <Image style={{ height: height, width: width, position: 'absolute', top:0, left:0 }} source={images.jeep} />
+            </View>
             <ScrollView>
                 {RenderForm()}
             </ScrollView>
